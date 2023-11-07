@@ -23,6 +23,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue
     Integer id;
+    @Column(unique = true)
     @NotBlank
     String username;
     @NotBlank
@@ -33,7 +34,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        System.out.println("used: " + role.name());
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
@@ -48,7 +50,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
@@ -58,11 +60,11 @@ public class User implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
