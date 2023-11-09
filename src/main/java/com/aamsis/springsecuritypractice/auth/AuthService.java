@@ -1,5 +1,6 @@
 package com.aamsis.springsecuritypractice.auth;
 
+import com.aamsis.springsecuritypractice.Exceptions.UserNotFound;
 import com.aamsis.springsecuritypractice.cache.Token;
 import com.aamsis.springsecuritypractice.cache.TokenService;
 import com.aamsis.springsecuritypractice.dtos.LoginDTO;
@@ -52,21 +53,21 @@ public class AuthService {
       return new RegisterDTO(token);
     }
 
-    LoginDTO login(LoginRequest req){
+    LoginDTO login(LoginRequest req) throws UserNotFound {
+      Optional<User> userQuery = this.userRepository.findByUsername(req.getUsername());
+      boolean isEmpty = userQuery.isEmpty();
+      if (isEmpty) {
+        throw new UserNotFound("User not found");
+      }
+
       authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
           req.getUsername(),
           req.getPassword()
         )
       );
-      Optional<User> userQuery = userRepository.findByUsername(req.getUsername());
-      if (userQuery.isEmpty()) {
-        throw new HttpClientErrorException(HttpStatusCode.valueOf(400), "User not found");
-      }
       User user = userQuery.get();
-
       String token = tokenService.buildToken(user);
-
       tokenService.setTokenInCache(
               token,
               Token

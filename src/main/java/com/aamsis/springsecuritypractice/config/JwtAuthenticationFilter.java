@@ -1,5 +1,6 @@
 package com.aamsis.springsecuritypractice.config;
 
+import com.aamsis.springsecuritypractice.Exceptions.TokenNotFoundException;
 import com.aamsis.springsecuritypractice.cache.Token;
 import com.aamsis.springsecuritypractice.cache.TokenService;
 import jakarta.servlet.FilterChain;
@@ -29,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        Iterator it = request.getHeaderNames().asIterator();
+        Iterator<String> it = request.getHeaderNames().asIterator();
         while (it.hasNext()) {
             System.out.println(it.next());
         }
@@ -38,14 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt = authHeader.substring(7);
 
         if (tokenService.isTokenExpired(jwt)) {
-            throw new ServletException("Token has expired");
+            throw new TokenNotFoundException("Token has expired");
         }
 
         Token token = tokenService.getToken(jwt);
         if (token == null) {
-            throw new ServletException("The token is invalid");
+            throw new TokenNotFoundException("Token not found");
         }
-
 
        UserDetails userDetails = this.userDetailsService.loadUserByUsername(token.getUsername());
 
@@ -61,9 +61,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
-
-
-
 
         System.out.println("Continue filter");
         filterChain.doFilter(request, response);
