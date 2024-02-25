@@ -8,18 +8,9 @@ import com.aamsis.springsecuritypractice.dtos.RegisterDTO;
 import com.aamsis.springsecuritypractice.user.User;
 import com.aamsis.springsecuritypractice.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserCache;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -32,8 +23,6 @@ import java.util.logging.Logger;
 public class AuthService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
-    private final AuthenticationManager authenticationManager;
-    private final UserDetailsService userDetailsService;
     private final CacheManager cacheManager;
 
     Logger logger = Logger.getLogger(AuthService.class.getName());
@@ -106,8 +95,7 @@ public class AuthService {
 
         final String authHeader = request.getHeader("authorization");
         final String jwt = authHeader.substring(7);
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(tokenService.extractUsername(jwt));
-        evictSingleCacheValue("tokenCache", userDetails.getUsername());
+        evictSingleCacheValue("tokenCache", tokenService.extractUsername(jwt));
         SecurityContextHolder.getContext().setAuthentication(null);
     }
 }
