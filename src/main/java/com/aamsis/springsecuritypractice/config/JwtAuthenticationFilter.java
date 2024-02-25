@@ -41,15 +41,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (tokenService.isTokenExpired(jwt)) {
             throw new TokenNotFoundException("Token has expired");
         }
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(tokenService.extractUsername(jwt));
 
-        Token token = tokenService.getToken(jwt);
-        if (token == null) {
-            throw new TokenNotFoundException("Token not found");
+        logger.info("this is the servlet path: " + request.getServletPath());
+        logger.info("this is the url: " + request.getRequestURL());
+
+        if (tokenService.get(userDetails.getUsername()) == null) {
+            throw new TokenNotFoundException("Token does not exist for the user, login again");
         }
 
-       UserDetails userDetails = this.userDetailsService.loadUserByUsername(token.getUsername());
-
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
+
             System.out.println("Null authentication");
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails,

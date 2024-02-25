@@ -24,6 +24,7 @@ public class WebSecurity {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+
     private final String[] whiteList = { "/api/v1/auth/**" };
     @Bean
     public SecurityFilterChain securityFilterChain(@NotNull HttpSecurity httpSecurity) throws Exception {
@@ -36,7 +37,6 @@ public class WebSecurity {
           .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
           .authenticationProvider(authenticationProvider)
           .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
 
         return httpSecurity.build();
 

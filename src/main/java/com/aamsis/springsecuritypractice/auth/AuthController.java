@@ -1,6 +1,7 @@
 package com.aamsis.springsecuritypractice.auth;
 
 import com.aamsis.springsecuritypractice.Exceptions.UserNotFound;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,5 +23,12 @@ public class AuthController {
     @PostMapping("/login")
     ResponseEntity<?> login(@RequestBody LoginRequest req) throws UserNotFound {
         return ResponseEntity.ok(service.login(req));
+    }
+
+    @PostMapping("/logout")
+    ResponseEntity<?> logout(HttpServletRequest req) {
+        service.logout(req);
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,6 +1,6 @@
 package com.aamsis.springsecuritypractice.cache;
 
-import com.aamsis.springsecuritypractice.user.User;
+import com.aamsis.springsecuritypractice.auth.AuthService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -8,14 +8,17 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -24,14 +27,23 @@ public class TokenService {
     private String secretKey;
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
-    private final RedisTemplate<String, Token> redisTemplate;
 
-    public Token getToken(String tokenString) {
-        return redisTemplate.opsForValue().get(tokenString);
+    private final CacheManager cacheManager;
+
+    Logger logger = Logger.getLogger(AuthService.class.getName());
+
+    @CachePut(key = "#userName", value = "tokenCache")
+    public String save(String userName, String token) {
+        return token;
     }
 
-    public void setTokenInCache(String tokenString, Token token){
-        redisTemplate.opsForValue().set(tokenString, token);
+    public String get(String userName) {
+        try {
+            return cacheManager.getCache("tokenCache").get(userName).toString();
+        } catch (NullPointerException e){
+            logger.log(Level.SEVERE, "token not found for username: " + userName);
+            return null;
+        }
     }
 
     private Key getSignInKey() {
@@ -56,6 +68,10 @@ public class TokenService {
 
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
