@@ -79,23 +79,14 @@ public class AuthService {
       return new LoginDTO(token);
     }
 
-    public void evictSingleCacheValue(String cacheName, String cacheKey) {
-        try {
-            cacheManager.getCache(cacheName) .evict(cacheKey);
-        } catch(NullPointerException e) {
-            logger.info("Cache name key " + cacheKey + "not found for cache name " + cacheName);
-        }
-    }
-
     public void logout(HttpServletRequest request) {
         Iterator<String> it = request.getHeaderNames().asIterator();
         while (it.hasNext()) {
             System.out.println(it.next());
         }
-
         final String authHeader = request.getHeader("authorization");
         final String jwt = authHeader.substring(7);
-        evictSingleCacheValue("tokenCache", tokenService.extractUsername(jwt));
+        tokenService.evictSingleCacheValue("tokenCache", tokenService.extractUsername(jwt));
         SecurityContextHolder.getContext().setAuthentication(null);
     }
 }

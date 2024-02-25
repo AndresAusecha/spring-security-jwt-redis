@@ -46,6 +46,14 @@ public class TokenService {
         }
     }
 
+    public void evictSingleCacheValue(String cacheName, String cacheKey) {
+        try {
+            cacheManager.getCache(cacheName).evict(cacheKey);
+        } catch(NullPointerException e) {
+            logger.info("Cache name key " + cacheKey + "not found for cache name " + cacheName);
+        }
+    }
+
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
