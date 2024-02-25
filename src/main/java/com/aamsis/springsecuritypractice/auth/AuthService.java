@@ -9,7 +9,6 @@ import com.aamsis.springsecuritypractice.user.User;
 import com.aamsis.springsecuritypractice.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.CacheManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,6 @@ import java.util.logging.Logger;
 public class AuthService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
-    private final CacheManager cacheManager;
 
     Logger logger = Logger.getLogger(AuthService.class.getName());
 
